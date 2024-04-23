@@ -6,14 +6,18 @@ import pandas as pd
 router = APIRouter(prefix="/db", tags=["scripts"],)
 templates = Jinja2Templates(directory="templates")
 
-@router.get("/transactions/{credit_card}/{format_type}/")
-async def get_transactions(request: Request, credit_card: str, format_type:str): #read from the database
-    df = pd.read_csv("data/transactions.csv")
-    df = df[df["Credit Card ID"]==credit_card]
+
+def format_response(df, format_type):
     if format_type == 'html':
         return Response(content=df.to_html(index=False, classes="table table-striped", escape=False), media_type="text/html")
     else:
         return Response(content=df.to_json(orient="records"), media_type="application/json")
+
+@router.get("/transactions/{credit_card}/{format_type}/")
+async def get_transactions(request: Request, credit_card: str, format_type:str): #read from the database
+    df = pd.read_csv("data/transactions.csv")
+    df = df[df["Credit Card ID"]==credit_card]
+    return format_response(df, format_type)
 
 @router.get("/")
 async def render_editable_csv(request: Request):
