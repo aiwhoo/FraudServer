@@ -101,6 +101,7 @@ async def shutdown(background_tasks: BackgroundTasks):
     print("shutdown")
     return "Server is shutting down"
 
+
 """
 1) schedule a cron job that checks a csv file, and sends out any emails on the csv file
 2) mechanism to add scheduled emails to ^^ csv
