@@ -37,6 +37,7 @@ class Customer(BaseModel):
     customer_id : str
     credit_card_list : list[str]
     transaction_id_list : int
+    amount : float
 
 #Schema for Fradulent transaction
 class Fraud(BaseModel):
@@ -303,5 +304,72 @@ async def create_bank_customer(request: Request,
         return "The Bank does not exist"
 
 
-        
+@router.get("/customer/{secret_id}")
+async def get_customer_info(request: Request, secret_id : str ):
+    if secret_id != password:
+        raise HTTPException(status_code=401, detail="Invalid secret ID")
+    
+    html_content = """
+        <html>
+        <head>
+            <title>Bank Profile</title>
+        </head>
+        <body>
+        <h1>Add Customer information</h1>
+        <form method="post" action="/db/customer/{secret_id}">
+            <label for= "customer_id"> Customer ID: </label>
+            <input type ="text" id="customer_id" name="customer_id" minlength="5" required> <br> </br>
 
+            <label for="credit_card_id">Credit Card ID:</label>
+            <input type="text" id="credit_card_id" name="credit_card_id" minlength="5" maxlength= "10" required ><br><br>
+        
+            <label for="amount">Amount of money:</label>
+            <input type="text" id="amount" name="amount" required ><br><br>    
+            
+            <button type="submit">Submit</button>
+                
+        </form>
+        </body>
+        </html> 
+    """
+    return HTMLResponse(content=html_content, status_code=200)
+
+@router.post("/customer/{secret_id}")
+async def insert_customer_info(
+    request:Request,
+    customer_id: str = Form(...),
+    credit_card_id: str = Form(...),
+    amount: float = Form(...)
+):
+
+    fieldnames = ['Customer ID', 'Credit Card ID', 'Amount']
+
+    csv_file = "data/customer.csv"
+    file_exists = os.path.isfile(csv_file)
+    if file_exists:
+        df = pd.read_csv("data/bank.csv", dtype={"Customer ID": str})
+        df2 = pd.read_csv("data/bank.csv", dtype={"Credit Card ID": str})
+
+        for item in df['Customer ID']: 
+            if item != customer_id:
+                return "This Customer ID does not exists! "
+            
+        for item in df2['Credit Card ID']:
+            if item == credit_card_id:
+                return "This credit card id has already been assigned"
+
+    with open(csv_file, 'a', newline='') as file:
+        writer = csv.DictWriter(file, fieldnames= fieldnames)
+    
+        if not file_exists:
+            writer.writeheader()
+
+        writer.writerow({
+            
+            'Customer ID' : customer_id,
+            'Credit Card ID' : credit_card_id,
+            'Amount':amount
+            })
+
+    df = pd.read_csv("data/customer.csv", dtype={"Customer ID": str})
+    return  format_response(df, format_type="html")
