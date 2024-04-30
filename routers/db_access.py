@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request, Form, Response
+from fastapi import APIRouter, Request, Form, Response,  HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 import pandas as pd
@@ -9,14 +9,54 @@ import os
 import csv 
 
 router = APIRouter(prefix="/db", tags=["scripts"],)
-#templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(directory="templates")
 
 
+password = "password"
+
+# bank network
+class Network(BaseModel):
+    bank_id: str | constr(min_length=5)
+
+
+# transaction Schema
 class Transaction(BaseModel):
     credit_card_id: str | constr(min_length=10, max_length=10)
     zip_code: str | constr(min_length=5, max_length=5)
     vendor_name: str
     amount: float
+
+# Schema for credit card
+class CreditCard(BaseModel):
+    customer_id : str 
+    credit_card_id: str | constr(min_length=10, max_length=10)
+    transaction_id : str
+
+#Schema for Customer
+class Customer(BaseModel):
+    customer_id : str
+    credit_card_list : list[str]
+    transaction_id_list : int
+
+#Schema for Fradulent transaction
+class Fraud(BaseModel):
+    credit_card_id: str | constr(min_length=10, max_length=10)
+    transaction_id : str
+    issuer : str
+
+#Schema for bank 
+class Bank(BaseModel):
+    bank_id : str | constr(min_length=5)
+    customer_id: str 
+    credit_card_id: str | constr(min_length=10, max_length=10)
+    customer_id_list : list[str]
+
+def search_df(df, item_id, index): #search df
+    if item_id in df[index].values:
+        return True
+    else:
+        return False
+
 
 
 def write_transaction_to_csv(transaction: Transaction, csv_file: str):
@@ -38,6 +78,7 @@ def write_transaction_to_csv(transaction: Transaction, csv_file: str):
             'Vendor Name': transaction.vendor_name,
             'Amount': transaction.amount
         })
+
 
 @router.get("/transactions/",  response_class=HTMLResponse)
 async def transaction_form(request: Request):
@@ -100,8 +141,167 @@ def format_response(df, format_type):
 @router.get("/transactions/{credit_card_id}/{format_type}/")
 async def get_transactions(request: Request, credit_card_id: str, format_type:str): #read from the database
     df = pd.read_csv("data/transactions.csv", dtype={"Credit Card ID": str})
-
     df = df[df["Credit Card ID"] == credit_card_id]
     return format_response(df, format_type)
 
+
+
+
+
+@router.get("/network/{secret_id}" , response_class=HTMLResponse)
+async def network(request: Request, secret_id = str ):
+    if secret_id != password:
+        raise HTTPException(status_code=401, detail="Invalid secret ID")
+    
+    html_content = """
+        <html>
+        <head>
+            <title>Network of Banks</title>
+        </head>
+        <body>
+        <h1>Create a New Bank</h1>
+        <form method="post" action="/db/network/{secret_id}">
+            <label for="bank_id">Create a New Bank ID:</label>
+            <input type="text" id="bank_id" name="bank_id" minlength="5" required ><br><br>
+            
+            <button type="submit">Submit</button>
+                
+        </form>
+        </body>
+        </html>
+
+    """
+
+    return HTMLResponse(content=html_content, status_code=200)
+
+
+@router.post("/network/{secret_id}")
+async def create_network( request: Request, 
+    bank_id: str = Form(...),
+    secret_id =  str
+):
+
+    network = Network(
+        bank_id= bank_id
+    )
+
+
+    csv_file = 'data/network.csv'
+    fieldnames = ['Bank ID', 'Date', 'Time']
+    file_exists = os.path.isfile(csv_file)
+
+    if file_exists:
+        df = pd.read_csv("data/network.csv", dtype={"Bank ID": str})
+
+        for item in df['Bank ID']:
+            if item == bank_id:
+                return "This Bank ID already exists!"
+
+    with open(csv_file, 'a', newline='') as file:
+        writer = csv.DictWriter(file, fieldnames=fieldnames)
+ 
+        if not file_exists:
+            writer.writeheader()
+
+        writer.writerow({
+            'Bank ID': bank_id,
+            'Date': str(datetime.now().date()),
+            'Time': str(datetime.now().time()),
+        })
+
+    df = pd.read_csv("data/network.csv", dtype={"Bank ID": str}) #read it again with the updated versions
+   
+    return  format_response(df, format_type="html")
+
+@router.get("/bank/{secret_id}/")
+async def create_bank(request: Request, secret_id : str ):
+    if secret_id != password:
+        raise HTTPException(status_code=401, detail="Invalid secret ID")
+    
+    html_content = """
+     <html>
+        <head>
+            <title>Bank Profile</title>
+        </head>
+        <body>
+        <h1>Create a Customer</h1>
+        <form method="post" action="/db/bank/{secret_id}">
+            <label for= "bank_id"> Your Bank ID: </label>
+            <input type ="text" id="bank_id" name="bank_id" minlength="5" required> <br> </br>
+
+            <label for="customer_id">Create a Customer:</label>
+            <input type="text" id="cutomer_id" name="customer_id" minlength="5" required ><br><br>
+        
+            <label for="credit_card_id">Create a Credit Card:</label>
+            <input type="text" id="credit_card_id" name="credit_card_id" minlength="5" maxlength="10" required ><br><br>    
+            
+            <button type="submit">Submit</button>
+                
+        </form>
+        </body>
+        </html>
+    """
+    
+    return HTMLResponse(content=html_content, status_code=200)
+
+@router.post("/bank/{secret_id}/")
+async def create_bank_customer(request: Request, 
+    bank_id: str = Form(...),                           
+    customer_id: str = Form(...),
+    credit_card_id: str = Form(...),
+    secret_id = str
+):
+    
+    
+    df = pd.read_csv("data/network.csv", dtype={"Bank ID": str})  # check to see if the id for bank exists
+
+    if search_df(df, bank_id ,"Bank ID"):
+        
+    
+        # bank = Bank (
+        #     bank_id= bank_id,
+        #     customer_id = customer_id,
+        #     credit_card_id = credit_card_id
+        # )
+     
+        
+        csv_file = 'data/bank.csv'
+        fieldnames = ['Bank ID', 'Customer ID', 'Credit Card ID' ,'Date', 'Time']
+        file_exists = os.path.isfile(csv_file)
+        if file_exists:
+            df = pd.read_csv("data/bank.csv", dtype={"Customer ID": str})
+            df2 = pd.read_csv("data/bank.csv", dtype={"Credit Card ID": str})
+
+            for item in df['Customer ID']: 
+                if item == customer_id:
+                    return "This Customer ID already exists! "
+            
+            for item in df2['Credit Card ID']:
+                if item == credit_card_id:
+                    return "One Credit Card ID cannot be assigned to more than one Customer "
+
+
+       
+        with open(csv_file, 'a', newline='') as file:
+            writer = csv.DictWriter(file, fieldnames=fieldnames)
+    
+            if not file_exists:
+                writer.writeheader()
+
+            writer.writerow({
+                'Bank ID': bank_id,
+                'Customer ID' : customer_id,
+                'Credit Card ID' : credit_card_id,
+                'Date': str(datetime.now().date()),
+                'Time': str(datetime.now().time()),
+            })
+        
+        
+        df = pd.read_csv("data/bank.csv", dtype={"Bank ID": str})
+        return  format_response(df, format_type="html")
+    else:
+        return "The Bank does not exist"
+
+
+        
 
