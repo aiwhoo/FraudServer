@@ -7,7 +7,7 @@ from pydantic import BaseModel,Field, constr
 from datetime import datetime
 import os
 import csv 
-
+import utils
 router = APIRouter(prefix="/db", tags=["scripts"],)
 templates = Jinja2Templates(directory="templates")
 
@@ -16,20 +16,20 @@ password = "password"
 
 # bank network
 class Network(BaseModel):
-    bank_id: str | constr(min_length=5)
+    bank_id: str
 
 
 # transaction Schema
 class Transaction(BaseModel):
-    credit_card_id: str | constr(min_length=10, max_length=10)
-    zip_code: str | constr(min_length=5, max_length=5)
+    credit_card_id: str
+    zip_code: str
     vendor_name: str
     amount: float
 
 # Schema for credit card
 class CreditCard(BaseModel):
     customer_id : str 
-    credit_card_id: str | constr(min_length=10, max_length=10)
+    credit_card_id: str
     transaction_id : str
 
 #Schema for Customer
@@ -41,15 +41,15 @@ class Customer(BaseModel):
 
 #Schema for Fradulent transaction
 class Fraud(BaseModel):
-    credit_card_id: str | constr(min_length=10, max_length=10)
+    credit_card_id: str
     transaction_id : str
     issuer : str
 
 #Schema for bank 
 class Bank(BaseModel):
-    bank_id : str | constr(min_length=5)
+    bank_id : str
     customer_id: str 
-    credit_card_id: str | constr(min_length=10, max_length=10)
+    credit_card_id: str
     customer_id_list : list[str]
 
 def search_df(df, item_id, index): #search df
@@ -140,7 +140,10 @@ def format_response(df, format_type):
         return Response(content=df.to_json(orient="records"), media_type="application/json")
 
 @router.get("/transactions/{credit_card_id}/{format_type}/")
+@utils.auth_required(role="all")
 async def get_transactions(request: Request, credit_card_id: str, format_type:str): #read from the database
+    print(utils.get_user_information(request))
+    print("^^^accessed get transactions funciton")
     df = pd.read_csv("data/transactions.csv", dtype={"Credit Card ID": str})
     df = df[df["Credit Card ID"] == credit_card_id]
     return format_response(df, format_type)
@@ -150,10 +153,8 @@ async def get_transactions(request: Request, credit_card_id: str, format_type:st
 
 
 @router.get("/network/{secret_id}" , response_class=HTMLResponse)
+@utils.auth_required(role="faculty")
 async def network(request: Request, secret_id = str ):
-    if secret_id != password:
-        raise HTTPException(status_code=401, detail="Invalid secret ID")
-    
     html_content = """
         <html>
         <head>
@@ -175,50 +176,10 @@ async def network(request: Request, secret_id = str ):
 
     return HTMLResponse(content=html_content, status_code=200)
 
-
-@router.post("/network/{secret_id}")
-async def create_network( request: Request, 
-    bank_id: str = Form(...),
-    secret_id =  str
-):
-
-    network = Network(
-        bank_id= bank_id
-    )
-
-
-    csv_file = 'data/network.csv'
-    fieldnames = ['Bank ID', 'Date', 'Time']
-    file_exists = os.path.isfile(csv_file)
-
-    if file_exists:
-        df = pd.read_csv("data/network.csv", dtype={"Bank ID": str})
-
-        for item in df['Bank ID']:
-            if item == bank_id:
-                return "This Bank ID already exists!"
-
-    with open(csv_file, 'a', newline='') as file:
-        writer = csv.DictWriter(file, fieldnames=fieldnames)
- 
-        if not file_exists:
-            writer.writeheader()
-
-        writer.writerow({
-            'Bank ID': bank_id,
-            'Date': str(datetime.now().date()),
-            'Time': str(datetime.now().time()),
-        })
-
-    df = pd.read_csv("data/network.csv", dtype={"Bank ID": str}) #read it again with the updated versions
-   
-    return  format_response(df, format_type="html")
-
 @router.get("/bank/{secret_id}/")
+@utils.auth_required(role="faculty")
+@utils.check_secret_password(secret_id="password")
 async def create_bank(request: Request, secret_id : str ):
-    if secret_id != password:
-        raise HTTPException(status_code=401, detail="Invalid secret ID")
-    
     html_content = """
      <html>
         <head>
@@ -271,17 +232,12 @@ async def create_bank_customer(request: Request,
         file_exists = os.path.isfile(csv_file)
         if file_exists:
             df = pd.read_csv("data/bank.csv", dtype={"Customer ID": str})
-            df2 = pd.read_csv("data/bank.csv", dtype={"Credit Card ID": str})
 
-            for item in df['Customer ID']: 
-                if item == customer_id:
-                    return "This Customer ID already exists! "
-            
-            for item in df2['Credit Card ID']:
-                if item == credit_card_id:
-                    return "One Credit Card ID cannot be assigned to more than one Customer "
+            if len(df[df['Customer ID'] == customer_id]) > 0:
+                return "This Customer ID already exists! "
 
-
+            if len(df[df['Credit Card ID'] == customer_id]) > 0:
+                return "One Credit Card ID cannot be assigned to more than one Customer "
        
         with open(csv_file, 'a', newline='') as file:
             writer = csv.DictWriter(file, fieldnames=fieldnames)
