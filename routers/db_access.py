@@ -63,6 +63,11 @@ def search_df(df, item_id, index): #search df
     else:
         return False
 
+def format_response(df, format_type):
+    if format_type == 'html':
+        return Response(content=df.to_html(index=False, classes="table table-striped", escape=False), media_type="text/html")
+    else:
+        return Response(content=df.to_json(orient="records"), media_type="application/json")
 
 
 
@@ -100,11 +105,7 @@ async def create_transaction(
     return format_response(df, format_type='html')
 
 
-def format_response(df, format_type):
-    if format_type == 'html':
-        return Response(content=df.to_html(index=False, classes="table table-striped", escape=False), media_type="text/html")
-    else:
-        return Response(content=df.to_json(orient="records"), media_type="application/json")
+
 
 @router.get("/transactions/{credit_card_id}/{format_type}/")
 @utils.auth_required(role="all")
