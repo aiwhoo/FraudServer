@@ -64,24 +64,6 @@ def search_df(df, item_id, index): #search df
 
 
 
-def write_transaction_to_csv(transaction: Transaction, csv_file: str):
-    fieldnames = ['Transaction ID', 'Date', 'Time', 'Credit Card ID', 'Zip Code', 'Vendor Name', 'Amount']
-    file_exists = os.path.isfile(csv_file)
-
-    with open(csv_file, 'a', newline='') as file:
-        writer = csv.DictWriter(file, fieldnames=fieldnames)
-
-        if not file_exists:
-            writer.writeheader()
-
-        writer.writerow({
-            'Transaction ID': str(uuid.uuid4()),
-            'Credit Card ID': transaction.credit_card_id,
-            'Zip Code': transaction.zip_code,
-            'Vendor Name': transaction.vendor_name,
-            'Amount': transaction.amount
-        })
-
 
 @router.get("/transactions/")
 async def transaction_form(request: Request):
