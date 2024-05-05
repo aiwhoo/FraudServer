@@ -3,8 +3,8 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 import pandas as pd
 import uuid
-from pydantic import BaseModel,Field, constr
-from datetime import datetime
+from pydantic import BaseModel,Field, constr, UUID4
+from datetime import datetime, date
 import os
 import csv 
 import utils
@@ -21,6 +21,9 @@ class Network(BaseModel):
 
 # transaction Schema
 class Transaction(BaseModel):
+    transaction_id : UUID4
+    date: str 
+    time: str
     credit_card_id: str
     zip_code: str
     vendor_name: str
@@ -52,6 +55,7 @@ class Bank(BaseModel):
     credit_card_id: str
     customer_id_list : list[str]
 
+
 def search_df(df, item_id, index): #search df
     if item_id in df[index].values:
         return True
@@ -72,8 +76,6 @@ def write_transaction_to_csv(transaction: Transaction, csv_file: str):
 
         writer.writerow({
             'Transaction ID': str(uuid.uuid4()),
-            'Date': str(datetime.now().date()),
-            'Time': str(datetime.now().time()),
             'Credit Card ID': transaction.credit_card_id,
             'Zip Code': transaction.zip_code,
             'Vendor Name': transaction.vendor_name,
@@ -81,56 +83,30 @@ def write_transaction_to_csv(transaction: Transaction, csv_file: str):
         })
 
 
-@router.get("/transactions/",  response_class=HTMLResponse)
+@router.get("/transactions/")
 async def transaction_form(request: Request):
-    html_content = """
-    <html>
-    <head>
-        <title>Transaction Form</title>
-    </head>
-    <body>
-        <h1>Create a New Transaction</h1>
-        <form method="post" action="/db/transactions/">
-            <label for="credit_card_id">Credit Card ID (10 characters):</label>
-            <input type="text" id="credit_card_id" name="credit_card_id" minlength="10" maxlength="10" required><br><br>
-            
-            <label for="zip_code">Zip Code (5 characters):</label>
-            <input type="text" id="zip_code" name="zip_code" minlength="5" maxlength="5" required><br><br>
-            
-            <label for="vendor_name">Vendor Name:</label>
-            <input type="text" id="vendor_name" name="vendor_name" required><br><br>
-            
-            <label for="amount">Amount:</label>
-            <input type="number" id="amount" name="amount" min="0" step="0.01" required><br><br>
-            
-            <button type="submit">Submit</button>
-        </form>
-    </body>
-    </html>
-    """
-    return HTMLResponse(content=html_content, status_code=200)
+  return templates.TemplateResponse("transaction.html.j2", {"request": request})
 
 
 @router.post("/transactions/")
-async def create_transaction( request: Request, 
+async def create_transaction( request: Request,
     credit_card_id: str = Form(...),
     zip_code: str = Form(...),
     vendor_name: str = Form(...),
     amount: float = Form(...),
 ):
+    current_datetime = datetime.now()
+    date = str(current_datetime.date())  # Extract the date component
+    time = str(current_datetime.time())  # Extract the time component
+    transaction_id = uuid.uuid4()
+   
+    transaction = Transaction(transaction_id=transaction_id, date = date, time = time,credit_card_id=credit_card_id, zip_code=zip_code, vendor_name=vendor_name, amount=amount)
 
-    transaction = Transaction(
-        credit_card_id=credit_card_id,
-        zip_code=zip_code,
-        vendor_name=vendor_name,
-        amount=amount
-    )
-    
-    # Write transaction to CSV file
+    df = pd.DataFrame(transaction.dict(), index=['transaction'])
     csv_file = 'data/transactions.csv'
-    write_transaction_to_csv(transaction, csv_file)
+    df.to_csv(csv_file, index=False)
 
-    return " Transaction succeessful"
+    return Response(content=df.to_html(index=False, classes="table table-striped", escape=False), media_type="text/html")
 
 
 def format_response(df, format_type):
