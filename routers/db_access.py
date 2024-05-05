@@ -12,6 +12,7 @@ router = APIRouter(prefix="/db", tags=["scripts"],)
 templates = Jinja2Templates(directory="templates")
 
 
+
 password = "password"
 
 # bank network
@@ -71,7 +72,7 @@ async def transaction_form(request: Request):
 
 
 @router.post("/transactions/")
-async def create_transaction( request: Request,
+async def create_transaction(
     credit_card_id: str = Form(...),
     zip_code: str = Form(...),
     vendor_name: str = Form(...),
@@ -84,11 +85,19 @@ async def create_transaction( request: Request,
    
     transaction = Transaction(transaction_id=transaction_id, date = date, time = time,credit_card_id=credit_card_id, zip_code=zip_code, vendor_name=vendor_name, amount=amount)
 
-    df = pd.DataFrame(transaction.dict(), index=['transaction'])
-    csv_file = 'data/transactions.csv'
+    csv_file = "data/transactions.csv"
+
+     # Check if the CSV file exists and is not empty
+    existing_df = pd.read_csv(csv_file) if os.path.isfile(csv_file) and os.path.getsize(csv_file) > 0 else pd.DataFrame()
+
+    # Create a DataFrame from the new transaction data  
+    new_df = pd.DataFrame([transaction.dict()])
+
+    # Concatenate existing data with new data or use new data directly
+    df = pd.concat([existing_df, new_df], ignore_index=True)
     df.to_csv(csv_file, index=False)
 
-    return Response(content=df.to_html(index=False, classes="table table-striped", escape=False), media_type="text/html")
+    return format_response(df, format_type='html')
 
 
 def format_response(df, format_type):
