@@ -1,0 +1,2 @@
+transaction_id,date,time,credit_card_id,zip_code,vendor_name,amount
+14901dad-b868-4ba8-95eb-d4d6748ac303,2024-05-04,22:17:31.005459,vat545324f,12345,walmart,23.0
