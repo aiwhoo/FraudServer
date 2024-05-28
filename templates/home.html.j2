@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Homepage</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='css/home_css.css') }}">
+</head>
+<body>
+    <!-- Main Content -->
+    <div class="container">
+        <!-- SVG Card Logo -->
+        <svg width="200" height="120" viewBox="0 0 300 180" xmlns="http://www.w3.org/2000/svg">
+            <!-- Credit Card Background -->
+            <rect x="0" y="0" width="300" height="180" fill="#4682b4" rx="15"/>
+            <!-- Chip -->
+            <rect x="30" y="70" width="40" height="30" fill="#ffd700"/>
+            <!-- Magnetic Stripe -->
+            <rect x="20" y="120" width="260" height="30" fill="#7fd3b0"/>
+        </svg>
+
+        <!-- Columns for User and Admin -->
+        <div class="columns">
+            <!-- User Buttons Container -->
+            <div class="user-buttons">
+                <h2>User Actions</h2>
+                <form method="get" action="/db/transactions/">
+                    <button type="submit">Go to transaction</button>              
+                </form>
+                <form method="get" action="/user-action1">
+                    <button type="submit">User Action 1</button>              
+                </form>
+                <form method="get" action="/user-action2">
+                    <button type="submit">User Action 2</button>              
+                </form>
+            </div>
+
+            <!-- Admin Buttons Container -->
+            <div class="admin-buttons">
+                <h2>Admin Actions</h2>
+                <form method="get" action="/adminlogin">
+                    <button type="submit">Admin Action 1</button>              
+                </form>
+                <form method="get" action="/admin-action2">
+                    <button type="submit">Admin Action 2</button>              
+                </form>
+                <form method="get" action="/admin-action3">
+                    <button type="submit">Admin Action 3</button>              
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,70 @@
+/* Centering the form in the page */
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; /* Modern font */
+    background-color: #f0f8ff; /* Light background color */
+}
+h1 {
+    font-size: 28px; /* Larger font size for emphasis */
+    color: #2c3e50; /* Darker color for a more professional look */
+    text-align: center; /* Center align the heading text */
+    margin-bottom: 30px; /* Space between heading and form elements */
+    font-weight: 600; /* Semi-bold for better emphasis */
+    line-height: 1.4; /* Better line spacing for readability */
+    padding: 0 20px; /* Padding for better text appearance */
+    border-bottom: 2px solid #4682b4; /* Bottom border to separate title from form */
+    display: inline-block; /* Adjust width to content */
+}
+
+
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    border: 2px solid #4682b4; /* Border color */
+    border-radius: 10px;
+    background-color: #ffffff; /* Form background color */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Adding a slight shadow for better visual */
+}
+
+label, input {
+    font-size: 18px; /* Slightly smaller for a cleaner look */
+    margin: 10px 0;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+label {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* Align labels to the left */
+    width: 100%; /* Full width to align with inputs */
+}
+
+input[type="text"], input[type="email"], input[type="password"] {
+    padding: 10px;
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px; /* Matching input font size for consistency */
+}
+
+button {
+    font-size: 18px; /* Matching form text size for consistency */
+    padding: 10px 20px;
+    margin-top: 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: #4682b4; /* Button background color */
+    color: white; /* Button text color */
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #5a9bd3; /* Button hover color */
+}

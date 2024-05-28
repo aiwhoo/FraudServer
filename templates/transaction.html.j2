@@ -1,4 +1,11 @@
+ <html> <head>
+   <meta charset="UTF-8">
+<link rel="stylesheet" href="{{ url_for('static', path='css/transaction_css.css') }}">
+ </head>
+<body>
+
  <form method="post" action="/db/transactions/">
+ <h1> Process your transaction here</h1> <br>   
             <label for="credit_card_id">Credit Card ID (10 characters):</label>
             <input type="text" id="credit_card_id" name="credit_card_id" minlength="10" maxlength="10" required><br><br>
             
@@ -13,3 +20,5 @@
             
             <button type="submit">Submit</button>
 </form>
+</body>
+</html>

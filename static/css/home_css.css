@@ -1,0 +1,65 @@
+/* General Styles */
+body {
+    margin: 0;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; /* Modern font */
+    background-color: #f0f8ff; /* Light background color */
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Align items to the top of the viewport */
+    height: 100vh;
+}
+
+/* Container for the logo and button grid */
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    margin-top: 20px; /* Adjust as needed */
+}
+
+/* Card Logo */
+svg {
+    width: 200px; /* Adjust width as needed */
+    height: 120px; /* Adjust height as needed */
+    margin-bottom: 20px; /* Space below the logo */
+}
+
+/* Columns for User and Admin Buttons */
+.columns {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    max-width: 800px; /* Adjust as needed */
+    margin-top: 20px; /* Space above the columns */
+}
+
+/* User and Admin Buttons Containers */
+.user-buttons, .admin-buttons {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 45%; /* Adjust as needed */
+}
+
+.user-buttons h2, .admin-buttons h2 {
+    margin-bottom: 10px; /* Space below the headings */
+}
+
+/* Buttons */
+button {
+    font-size: 18px;
+    padding: 10px 20px;
+    margin: 10px 0; /* Vertical margin between buttons */
+    border: none;
+    border-radius: 5px;
+    background-color: #4682b4; /* Button background color */
+    color: white; /* Button text color */
+    cursor: pointer;
+    transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+    width: 100%; /* Full width inside the container */
+}
+
+button:hover {
+    background-color: #5a9bd3; /* Button hover color */
+}

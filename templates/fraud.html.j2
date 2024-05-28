@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Credit Card Input</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='css/fraud_input.css') }}">
+</head>
+<body>
+    <!-- Main Content -->
+    <div class="input-container">
+        <h2>Enter the credit card number for the transaction</h2>
+        <form method="post" action="/submit_credit_card">
+            <div class="form-group">
+                <label for="credit_card_id">Credit Card ID:</label>
+                <input type="text" id="credit_card_id" name="credit_card_id" required>
+            </div>
+            <div class="form-group">
+                <label for="issuer">Name of the issuer:</label>
+                <input type="text" id="issuer" name="issuer" required>
+            </div>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+</body>
+</html>

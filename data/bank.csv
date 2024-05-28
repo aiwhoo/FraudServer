@@ -1,3 +1,5 @@
-Bank ID,Customer ID,Credit Card ID,Date,Time
-husky,jackie chan,9876543210,2024-04-29,21:45:18.623335
-
+bank_id,customer_id,credit_card_id
+husky,mount washington,1234554320
+husky,mount washington,1234554320
+husky,mount w,1234554320
+husky,mount w,1234554320

@@ -12,6 +12,8 @@ from fastapi.templating import Jinja2Templates
 from starlette.config import Config
 from starlette.middleware.sessions import SessionMiddleware
 from starlette.responses import HTMLResponse, RedirectResponse
+from starlette.routing import Route, Mount
+from starlette.staticfiles import StaticFiles
 
 from routers import (db_access)
 
@@ -25,7 +27,9 @@ import os
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
-#app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -35,12 +39,15 @@ app.add_middleware(
 )
 app.add_middleware(SessionMiddleware, secret_key="!secret")
 
-config = Config('.env')
+
+#config = Config(environ=Data)
+config = Config(".env")
 oauth = OAuth(config)
 
 CONF_URL = 'https://accounts.google.com/.well-known/openid-configuration'
 oauth.register(
     name='google',
+    client_id = "1016015525446-jt8tfp5bkh99220khogmd6tqo0hluptg.apps.googleusercontent.com",
     server_metadata_url=CONF_URL,
     client_kwargs={
         'scope': 'openid email profile'
@@ -52,10 +59,12 @@ app.include_router(db_access.router)
 
 @app.get("/")
 async def root(request: Request):
-    return "Hello world"
+    return templates.TemplateResponse("home.html.j2", {"request": request})
 
 
-
+@app.get("/adminlogin")
+async def adminlogin(request:Request):
+    return templates.TemplateResponse("login.html.j2", {"request": request})
 
 @app.get('/login')
 async def login(request: Request):

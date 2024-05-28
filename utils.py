@@ -1,9 +1,11 @@
 from functools import wraps
 from starlette.responses import RedirectResponse
 from fastapi import Request
+from fastapi.templating import Jinja2Templates
 
-faculty_listing = []
-super_users = ["mattsap@udel.edu"]
+templates = Jinja2Templates(directory="templates")
+faculty_listing = ["ashimaganja98@gmail.com"]
+super_users = ["mattsap@udel.edu","ashimaganja98@gmail.com"]
 def auth_required(*decorator_args, **decorator_kwargs):
     def inner(func):
         @wraps(func)
@@ -45,7 +47,8 @@ def check_secret_password(*decorator_args, **decorator_kwargs):
             if kwargs["secret_id"] == decorator_kwargs["secret_id"]:
                 return await func(*args, **kwargs)
             else:
-                return "Secret ID does not match"
+                #return "Secret ID does not match"
+                return templates.TemplateResponse("wrongPass.html.j2", {"request": request})
 
 
         return wrapper

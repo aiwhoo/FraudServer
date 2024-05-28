@@ -1,0 +1,65 @@
+/* General Styles */
+body {
+    margin: 0;
+    font-family: 'Creepster', 'Helvetica Neue', Helvetica, Arial, sans-serif; /* Spooky font */
+    background-color: #000000; /* Dark background */
+    color: #ffffff; /* White text */
+    display: flex;
+    justify-content: center;
+    align-items: center; /* Center content vertically */
+    height: 100vh;
+    background-image: url('https://www.transparenttextures.com/patterns/asfalt-dark.png'); /* Spooky background texture */
+}
+
+/* Import spooky font */
+@import url('https://fonts.googleapis.com/css2?family=Creepster&display=swap');
+
+/* Container */
+.container {
+    text-align: center;
+    border: 2px solid #ff0000; /* Red border */
+    padding: 20px 40px;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.5); /* Red glow */
+    background-color: rgba(0, 0, 0, 0.8); /* Semi-transparent background */
+}
+
+/* Heading */
+h1 {
+    font-size: 48px;
+    margin-bottom: 20px;
+    color: #ff0000; /* Red text */
+    animation: flicker 1.5s infinite alternate; /* Flickering effect */
+}
+
+/* Paragraph */
+p {
+    font-size: 18px;
+    margin-bottom: 30px;
+}
+
+/* Button */
+.button {
+    font-size: 18px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: #ff0000; /* Red background */
+    color: white; /* White text */
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease; /* Smooth transition */
+    display: inline-block;
+}
+
+.button:hover {
+    background-color: #d40000; /* Darker red on hover */
+    transform: scale(1.1); /* Slightly larger on hover */
+}
+
+/* Flickering animation */
+@keyframes flicker {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
