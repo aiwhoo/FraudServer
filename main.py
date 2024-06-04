@@ -4,7 +4,7 @@ import string
 import time
 from apscheduler.schedulers.background import BackgroundScheduler
 from authlib.integrations.starlette_client import OAuth, OAuthError
-from fastapi import FastAPI, Request, Response, BackgroundTasks
+from fastapi import FastAPI, Request, Response, BackgroundTasks, Form
 
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -18,7 +18,7 @@ from starlette.staticfiles import StaticFiles
 from routers import (db_access)
 
 
-import os
+import os, utils
 #logging.config.fileConfig('logging.conf', disable_existing_loggers=False)
 
 # get root logger
@@ -61,10 +61,16 @@ app.include_router(db_access.router)
 async def root(request: Request):
     return templates.TemplateResponse("home.html.j2", {"request": request})
 
-
+@utils.check_secret_password(secret_id = 'password')
 @app.get("/adminlogin")
 async def adminlogin(request:Request):
-    return templates.TemplateResponse("login.html.j2", {"request": request})
+    return templates.TemplateResponse("Adminlogin.html.j2", {"request": request, "secret_id" : None})
+
+@utils.check_secret_password(secret_id = 'password')
+@app.post("/adminlogin")
+async def checkadmin(request:Request, secret_code: str=Form(...)):
+    return templates.TemplateResponse("Adminlogin.html.j2", {"request": request, "secret_id" : secret_code})
+
 
 @app.get('/login')
 async def login(request: Request):

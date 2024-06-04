@@ -40,7 +40,7 @@ class CreditCard(BaseModel):
 class Customer(BaseModel):
     customer_id : str
     credit_card_id: str
-    credit_card_list : int
+   # credit_card_list : int
     amount : float
 
 #Schema for Fradulent transaction
@@ -62,7 +62,7 @@ def search_df(df, item_id, index): #search df
     else:
         return False
 
-def format_response(df, format_type):
+def format_response(df, format_type='html'):
     if format_type == 'html':
         return Response(content=df.to_html(index=False, classes="table table-striped", escape=False), media_type="text/html")
     else:
@@ -84,7 +84,7 @@ def create_csv_file(csv_file, base, distinct=False, key=None):
 
 @router.get("/transactions/")
 async def transaction_form(request: Request):
-  return templates.TemplateResponse("transaction.html.j2", {"request": request})
+  return templates.TemplateResponse("transaction.html.j2", {"request": request}) 
 
 
 @router.post("/transactions/")
@@ -131,7 +131,6 @@ async def get_transactions(request: Request, credit_card_id: str, format_type:st
 @router.get("/customer/{secret_id}")
 @utils.check_secret_password(secret_id="password")
 async def get_customer_info( request: Request, secret_id : str ):
-    
     return templates.TemplateResponse("customer.html.j2", {"request": request})
     
 
@@ -149,13 +148,12 @@ async def insert_customer_info(
     # ---------------- To DO ----
     # create a list of credit cards based on the customer id 
     # count the number of cards that customer has length of the list and then add it to the credit card list.
-
-    
-    
+        
     customer = Customer(customer_id=customer_id, credit_card_id= credit_card_id, amount = amount)
     
-    return create_csv_file(csv_file, customer)
+    df =  create_csv_file(csv_file, customer)
 
+    return format_response(df, format_type = 'JSON')
 
 
 
@@ -173,7 +171,6 @@ async def create_network(bank_id: str = Form(...)):
     current_datetime = datetime.now()
     date = str(current_datetime.date())  # Extract the date component
     network = Network(bank_id=bank_id, date=date)
-
 
     csv_file = "data/network.csv" 
 
@@ -207,12 +204,9 @@ async def create_bank_customer(request: Request,
   
 ):
     bank = Bank(bank_id=bank_id, customer_id=customer_id, credit_card_id=credit_card_id)
-    csv_file = "data/bank.csv"
-    
+    csv_file = "data/bank.csv"    
     df = create_csv_file(csv_file, bank)
-
-    return df
-
+    return format_response(df)
 
 
 @router.get("/fraud/{secret_id}/")
