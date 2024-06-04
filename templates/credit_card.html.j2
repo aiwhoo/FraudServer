@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bank Profile</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='css/bank_profile.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Create a Customer</h1>
+        <form method="post" action="/db/credit_card/{secret_id}">
+            <label for="bank_id">Your Bank ID:</label>
+            <input type="text" id="bank_id" name="bank_id" minlength="3" required> <br>
+
+            <label for="limit">Credit Card Limit:</label>
+            <input type="text" id="limit" name="limit" minlength="3" maxlength="10" required><br>
+
+            <label for="credit_zipcode">Credit Zipcode:</label>
+            <input type="text" id="credit_zipcode" name="credit_zipcode" minlength="3" maxlength="10" required><br>
+
+
+            
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+</body>
+</html>
