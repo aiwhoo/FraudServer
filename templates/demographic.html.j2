@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Customer Information</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='css/customer_info.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Add Demographic Information</h1>
+        <form method="post" action="/db/demographic/{secret_id}">
+
+
+            <label for="customer_name">Name:</label>
+            <input type="text" id="customer_name" name="customer_name" minlength="3" required> <br>
+
+            <label for="credit_card_id">Credit Card ID:</label>
+            <input type="text" id="credit_card_id" name="credit_card_id" required><br>
+        
+            <label for="home_zipcode">House Zipcode:</label>
+            <input type="text" id="home_zipcode" name="home_zipcode" required><br>
+            
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+</body>
+</html>
