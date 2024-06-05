@@ -1,12 +1,10 @@
-from fastapi import APIRouter, Request, Form, Response,  HTTPException, Query
-from fastapi.responses import HTMLResponse
+from fastapi import APIRouter, Request, Form, Response,  Query
 from fastapi.templating import Jinja2Templates
 import pandas as pd
 import uuid
-from pydantic import BaseModel,Field, constr, UUID4
-from datetime import datetime, date
+from pydantic import Field, constr, UUID4
+from datetime import datetime
 import os
-import csv 
 import utils
 router = APIRouter(prefix="/db", tags=["scripts"],)
 templates = Jinja2Templates(directory="templates")
